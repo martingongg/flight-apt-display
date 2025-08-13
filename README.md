@@ -16,3 +16,12 @@ The **ESP32-WROOM-32** emerges as the optimal microcontroller choice for this ap
 | GPIO Pins    | 32                 | 17                | 14                   |
 | Price Range  | $6–8               | $3–5              | $20–25               |
 
+## Common Issues and Solutions
+
+| Issue              | Symptoms                     | Resolution                                                   |
+|--------------------|------------------------------|--------------------------------------------------------------|
+| WiFi Disconnections| Periodic connectivity loss   | Disable modem sleep, implement reconnection logic            |
+| Random Resets      | Unexpected reboots            | Increase power supply capacity, add bulk capacitance         |
+| Display Corruption | Garbled screen content        | Reduce I2C speed, improve ground connections                 |
+| Audio Distortion   | Crackling or noise            | Separate analog/digital grounds, add ferrite beads           |
+| Memory Exhaustion  | Crashes after extended operation | Implement memory monitoring, reduce buffer sizes          |
