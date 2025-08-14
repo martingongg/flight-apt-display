@@ -1,5 +1,7 @@
 # FlightAPT-Display ✈️
 
+Project by: Sean Young (@1shyoung), Martin Gong (@martingongg)
+
 A real-time, ESP32-based digital display that shows active passenger flights over its current location. This project leverages open-source technologies to provide a professional-grade flight tracking solution that is both cost-effective and highly customizable for makers and hobbyists.
 
 ![Build Status](https://img.shields.io/badge/build-passing-brightgreen)
