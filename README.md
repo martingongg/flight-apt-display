@@ -1,36 +1,105 @@
-# flight-apt-display
-A ESP32 - based digital display showing active passenger flights over it's current set location.
+# FlightAPT-Display ✈️
 
-The primary objectives of this project include developing a reliable, cost-effective solution that provides professional-grade functionality while remaining accessible to makers and hobbyists. Current market solutions often lack customization options or require expensive proprietary hardware. This implementation leverages open-source technologies and readily available components to create a flexible platform suitable for various applications ranging from kitchen timers to productivity management tools.
+A real-time, ESP32-based digital display that shows active passenger flights over its current location. This project leverages open-source technologies to provide a professional-grade flight tracking solution that is both cost-effective and highly customizable for makers and hobbyists.
 
-## Hardware Architecture and Component Selection
+![Build Status](https://img.shields.io/badge/build-passing-brightgreen)
+![Platform](https://img.shields.io/badge/platform-ESP32-blue)
+![License](https://img.shields.io/badge/license-MIT-lightgrey)
 
-### 2.1 Microcontroller Selection
-The **ESP32-WROOM-32** emerges as the optimal microcontroller choice for this application. Its specifications significantly exceed traditional Arduino boards while maintaining compatibility with the Arduino IDE and ecosystem.
+---
 
-| Feature      | ESP32              | ESP8266           | Arduino Uno          |
-|--------------|--------------------|-------------------|----------------------|
-| Processor    | Dual-core 240 MHz  | Single-core 80 MHz| Single-core 16 MHz   |
-| RAM          | 520 KB SRAM        | 160 KB            | 2 KB                 |
-| WiFi         | Built-in 802.11b/g/n | Built-in 802.11b/g/n | Requires shield     |
-| GPIO Pins    | 32                 | 17                | 14                   |
-| Price Range  | $6–8               | $3–5              | $20–25               |
+## 📋 Features
 
-## Common Issues and Solutions
+* **Real-Time Flight Tracking:** Connects to public aviation data APIs via WiFi to display live aircraft positions.
+* **High-Performance Platform:** Built on the ESP32-WROOM-32, offering a dual-core processor, ample RAM, and built-in WiFi for smooth, responsive operation.
+* **Cost-Effective & Accessible:** Uses readily available components and open-source software, making it an affordable alternative to proprietary systems.
+* **Portable & Flexible:** Low power consumption allows for both stationary home setups and portable, battery-powered field use.
+* **Customizable:** A flexible platform suitable for various applications, from a dedicated flight tracker to a multi-purpose display for other projects.
 
-| Issue              | Symptoms                     | Resolution                                                   |
-|--------------------|------------------------------|--------------------------------------------------------------|
-| WiFi Disconnections| Periodic connectivity loss   | Disable modem sleep, implement reconnection logic            |
-| Random Resets      | Unexpected reboots            | Increase power supply capacity, add bulk capacitance         |
-| Display Corruption | Garbled screen content        | Reduce I2C speed, improve ground connections                 |
-| Audio Distortion   | Crackling or noise            | Separate analog/digital grounds, add ferrite beads           |
-| Memory Exhaustion  | Crashes after extended operation | Implement memory monitoring, reduce buffer sizes          |
+---
 
+## ⚙️ Hardware Required
 
-This comprehensive analysis reveals several critical insights for successful ESP32-based flight tracking system implementation:
+* **Microcontroller:** ESP32-WROOM-32
+* **Display:** Any compatible SPI or I2C display (e.g., TFT, OLED)
+* **Power Supply:** 5V USB power supply or a 3.3V LiPo battery for portable use.
+* **Enclosure:** (Optional) A 3D-printed or project case for protection.
 
-First, the ESP32 platform provides a balance of performance, cost, and community support for real-time aviation data processing. Its integrated WiFi, generous memory resources, and dual-core architecture enable continuous collection, decoding, and visualization of aircraft positions from online flight tracking APIs. Unlike traditional Arduino boards, the ESP32’s higher clock speed and multithreaded capabilities allow simultaneous handling of network communications, data parsing, and user interface updates without performance bottlenecks.
+### Why the ESP32?
 
-Second, flight tracking applications benefit greatly from the ESP32’s wireless connectivity, processing power, and flexibility. By interfacing with the internet, it can connect to public aviation data APIs to access global flight information in real time. These capabilities enable both stationary installations, such as home-based monitoring stations, and portable setups for field operations, supported by the ESP32’s low power draw and the possibility of solar or battery operation.
+The **ESP32-WROOM-32** is the optimal choice for this application. Its integrated WiFi, generous memory, and dual-core architecture enable continuous collection, decoding, and visualization of aircraft data without the performance bottlenecks of traditional microcontrollers.
 
-Third, attention to hardware design details significantly impacts the system’s reliability and longevity. A stable, adequately rated power supply ensures uninterrupted operation, especially during high data throughput. Shielded enclosures and proper antenna placement improve reception range and reduce noise from nearby electronics. Thermal management is essential for outdoor deployments in hot climates, and environmental sealing protects the device from moisture, dust, and temperature fluctuations. These considerations elevate a DIY flight tracker into a robust, professional-grade monitoring solution.
+| Feature         | ESP32                | ESP8266            | Arduino Uno      |
+| :-------------- | :------------------- | :----------------- | :--------------- |
+| **Processor** | Dual-core 240 MHz    | Single-core 80 MHz | Single-core 16 MHz |
+| **RAM** | 520 KB SRAM          | 160 KB             | 2 KB             |
+| **WiFi** | Built-in 802.11b/g/n | Built-in 802.11b/g/n | Requires shield  |
+| **GPIO Pins** | 32                   | 17                 | 14               |
+| **Price Range** | $6–8                 | $3–5               | $20–25           |
+
+---
+
+## 🚀 Software Installation & Setup
+
+### 1. Configure Arduino IDE
+
+1.  **Install Arduino IDE:** Download and install the latest version from the [official Arduino website](https://www.arduino.cc/en/software).
+2.  **Add ESP32 Board Manager:**
+    * Open Arduino IDE and go to `File` > `Preferences` (or `Arduino IDE` > `Settings...` on macOS).
+    * In the "Additional boards manager URLs" field, paste the following URL:
+        ```
+        [https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json](https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json)
+        ```
+    * Click "OK".
+3.  **Install ESP32 Boards:**
+    * Go to `Tools` > `Board` > `Boards Manager...`.
+    * Search for "ESP32" and install the package by **Espressif Systems**.
+    * After installation, select your specific ESP32 board from the `Tools` > `Board` menu (e.g., "ESP32 Dev Module").
+
+### 2. Install Libraries
+
+This project requires several libraries. Install them using the Arduino Library Manager (`Sketch` > `Include Library` > `Manage Libraries...`):
+
+* `WiFi.h`: For connecting to the internet.
+* `HTTPClient.h`: For making requests to the flight data API.
+* `ArduinoJson.h`: For parsing the JSON data returned by the API.
+* A library for your specific display (e.g., `TFT_eSPI` for TFT displays).
+
+### 3. Configure Project Settings
+
+1.  **Clone the Repository:**
+    ```sh
+    git clone [https://github.com/your-username/flight-apt-display.git](https://github.com/your-username/flight-apt-display.git)
+    ```
+2.  **Add WiFi Credentials:** Open the main `.ino` file and update the following lines with your network details:
+    ```cpp
+    const char* ssid = "YOUR_WIFI_SSID";
+    const char* password = "YOUR_WIFI_PASSWORD";
+    ```
+3.  **Set API Endpoint & Location:** Configure the API URL and your geographical coordinates (latitude/longitude) to fetch flights for your specific area.
+
+---
+
+## 🛠️ Troubleshooting
+
+Attention to hardware design significantly impacts system reliability. A stable power supply, proper shielding, and good antenna placement are key to creating a robust, professional-grade monitoring solution.
+
+| Issue                  | Symptoms                       | Resolution                                             |
+| :--------------------- | :----------------------------- | :----------------------------------------------------- |
+| **WiFi Disconnections**| Periodic connectivity loss     | Disable modem sleep; implement reconnection logic.      |
+| **Random Resets** | Unexpected reboots             | Increase power supply capacity; add bulk capacitance.  |
+| **Display Corruption** | Garbled screen content         | Reduce I2C/SPI speed; improve ground connections.      |
+| **Memory Exhaustion** | Crashes after extended operation | Implement memory monitoring; reduce buffer sizes.      |
+
+---
+
+## 🙏 Acknowledgements
+
+* This project was developed by **Sean Young ("1shyoung")**.
+* Inspiration and core concepts were adapted from the [flightportal](https://github.com/smartbutnot/flightportal) project. Thank you to the original creators for their excellent work.
+
+---
+
+## 📜 License
+
+This project is licensed under the MIT License. See the `LICENSE` file for details.
