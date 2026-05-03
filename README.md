@@ -2,7 +2,11 @@
 
 Project by: Sean Young (@1shyoung), Martin Gong (@martingongg)
 
-A real-time, ESP32-based digital display that shows active passenger flights over its current location. This project leverages open-source technologies to provide a professional-grade flight tracking solution that is both cost-effective and highly customizable for makers and hobbyists.
+A real-time, ESP32-based digital display that shows active passenger
+flights overhead on a 64×64 HUB75 RGB LED matrix.  This project leverages
+open-source technologies to provide a professional-grade flight tracking
+solution that is both cost-effective and highly customizable for makers
+and hobbyists.
 
 ![Build Status](https://img.shields.io/badge/build-passing-brightgreen)
 ![Platform](https://img.shields.io/badge/platform-ESP32-blue)
@@ -12,96 +16,144 @@ A real-time, ESP32-based digital display that shows active passenger flights ove
 
 ## 📋 Features
 
-* **Real-Time Flight Tracking:** Connects to public aviation data APIs via WiFi to display live aircraft positions.
-* **High-Performance Platform:** Built on the ESP32-WROOM-32, offering a dual-core processor, ample RAM, and built-in WiFi for smooth, responsive operation.
-* **Cost-Effective & Accessible:** Uses readily available components and open-source software, making it an affordable alternative to proprietary systems.
-* **Portable & Flexible:** Low power consumption allows for both stationary home setups and portable, battery-powered field use.
-* **Customizable:** A flexible platform suitable for various applications, from a dedicated flight tracker to a multi-purpose display for other projects.
+* **Real-Time Flight Tracking:** Polls the public [OpenSky Network](https://opensky-network.org/) API every 15 s for every aircraft inside a configurable bounding box around your home.
+* **High-Performance Platform:** Built on the ESP32-WROOM-32 — dual-core 240 MHz processor, 520 KB SRAM, and built-in 802.11 b/g/n WiFi.
+* **Cost-Effective & Accessible:** Stock 64×64 / 2.5 mm HUB75 panels are widely available; everything else is open-source.
+* **Portable & Flexible:** Runs from any 5 V supply that can deliver ≥ 3 A peak for the panel; a small LiPo + boost converter makes it field-portable.
+* **Customizable:** Modular sketch (config / api / display / flight) makes it easy to retarget the display to a different data source.
 
 ---
 
-## ⚙️ Hardware Required
+## ⚙️ Hardware
 
-* **Microcontroller:** ESP32-WROOM-32
-* **Display:** Any compatible SPI or I2C display (e.g., TFT, OLED)
-* **Power Supply:** 5V USB power supply or a 3.3V LiPo battery for portable use.
-* **Enclosure:** (Optional) A 3D-printed or project case for protection.
+| Part                   | Notes                                          |
+| :--------------------- | :--------------------------------------------- |
+| ESP32-WROOM-32 dev kit | Any 38-pin board works.                        |
+| 64×64 HUB75 RGB matrix | 2.5 mm pitch (the supplied STL casing fits this size). |
+| 5 V / 4 A PSU          | Panel + ESP32 share the rail.                  |
+| 3D-printed enclosure   | STL files in repo root.                        |
+| 16-pin HUB75 ribbon    | Comes with most panels.                        |
 
-### Why the ESP32?
+### Default pin map (edit in `config.h`)
 
-The **ESP32-WROOM-32** is the optimal choice for this application. Its integrated WiFi, generous memory, and dual-core architecture enable continuous collection, decoding, and visualization of aircraft data without the performance bottlenecks of traditional microcontrollers.
+| Signal | GPIO | | Signal | GPIO |
+| :----- | :--- | :- | :----- | :--- |
+| R1     | 25   | | R2     | 14   |
+| G1     | 26   | | G2     | 12   |
+| B1     | 27   | | B2     | 13   |
+| A      | 23   | | B      | 19   |
+| C      | 5    | | D      | 17   |
+| E      | 18   | | LAT    | 4    |
+| OE     | 15   | | CLK    | 16   |
 
-| Feature         | ESP32                | ESP8266            | Arduino Uno      |
-| :-------------- | :------------------- | :----------------- | :--------------- |
-| **Processor** | Dual-core 240 MHz    | Single-core 80 MHz | Single-core 16 MHz |
-| **RAM** | 520 KB SRAM          | 160 KB             | 2 KB             |
-| **WiFi** | Built-in 802.11b/g/n | Built-in 802.11b/g/n | Requires shield  |
-| **GPIO Pins** | 32                   | 17                 | 14               |
-| **Price Range** | $6–8                 | $3–5               | $20–25           |
+> **E** is required for the 1/32 scan rate of 64-row panels.
 
 ---
 
-## 🚀 Software Installation & Setup
+## 🚀 Software Installation
 
-### 1. Configure Arduino IDE
+### 1. Arduino IDE
 
-1.  **Install Arduino IDE:** Download and install the latest version from the [official Arduino website](https://www.arduino.cc/en/software).
-2.  **Add ESP32 Board Manager:**
-    * Open Arduino IDE and go to `File` > `Preferences` (or `Arduino IDE` > `Settings...` on macOS).
-    * In the "Additional boards manager URLs" field, paste the following URL:
-        ```
-        [https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json](https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json)
-        ```
-    * Click "OK".
-3.  **Install ESP32 Boards:**
-    * Go to `Tools` > `Board` > `Boards Manager...`.
-    * Search for "ESP32" and install the package by **Espressif Systems**.
-    * After installation, select your specific ESP32 board from the `Tools` > `Board` menu (e.g., "ESP32 Dev Module").
+1. Install [Arduino IDE 2.x](https://www.arduino.cc/en/software).
+2. `File ▸ Preferences ▸ Additional boards manager URLs`
+   ```
+   https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
+   ```
+3. `Tools ▸ Board ▸ Boards Manager` → install **esp32 by Espressif Systems**.
+4. Select **ESP32 Dev Module** from `Tools ▸ Board`.
 
-### 2. Install Libraries
+### 2. Libraries
 
-This project requires several libraries. Install them using the Arduino Library Manager (`Sketch` > `Include Library` > `Manage Libraries...`):
+Install from the Library Manager (`Sketch ▸ Include Library ▸ Manage Libraries…`):
 
-* `WiFi.h`: For connecting to the internet.
-* `HTTPClient.h`: For making requests to the flight data API.
-* `ArduinoJson.h`: For parsing the JSON data returned by the API.
-* A library for your specific display (e.g., `TFT_eSPI` for TFT displays).
+* **ESP32-HUB75-MatrixPanel-DMA** by *mrcodetastic / mrfaptastic*
+* **ArduinoJson** by *Benoit Blanchon* (v6.x)
+* **Adafruit GFX Library** (auto-installed with the matrix lib)
 
-### 3. Configure Project Settings
+`WiFi.h`, `WiFiClientSecure.h`, and `HTTPClient.h` ship with the ESP32 core.
 
-1.  **Clone the Repository:**
-    ```sh
-    git clone [https://github.com/your-username/flight-apt-display.git](https://github.com/your-username/flight-apt-display.git)
-    ```
-2.  **Add WiFi Credentials:** Open the main `.ino` file and update the following lines with your network details:
-    ```cpp
-    const char* ssid = "YOUR_WIFI_SSID";
-    const char* password = "YOUR_WIFI_PASSWORD";
-    ```
-3.  **Set API Endpoint & Location:** Configure the API URL and your geographical coordinates (latitude/longitude) to fetch flights for your specific area.
+### 3. Configure
+
+Open [`flight_apt_display/config.h`](./flight_apt_display/config.h) and set:
+
+```cpp
+#define WIFI_SSID      "your-ssid"
+#define WIFI_PASSWORD  "your-password"
+
+#define HOME_LAT        47.6062f     // your latitude  (+N)
+#define HOME_LON       -122.3321f    // your longitude (-W)
+#define SEARCH_RADIUS    0.40f       // ± degrees around home
+```
+
+The sketch uses anonymous OpenSky access by default.  If you have a
+free OpenSky account, set `OPENSKY_USER` / `OPENSKY_PASS` for higher
+rate limits.
+
+### 4. Build & Flash
+
+1. Open `flight_apt_display/flight_apt_display.ino`.
+2. Select your serial port and click **Upload**.
+3. Open the Serial Monitor at **115 200 baud** to watch the boot log.
+
+---
+
+## 🖼️ On-screen layout
+
+```
+┌────────────────────── 64 px ──────────────────────┐
+│ AAL237                                            │  ← callsign (yellow, marquees if long)
+│ United States                                     │  ← origin country (grey)
+├───────────────────────────────────────────────────┤
+│   ╭───╮                                           │
+│   │ ↗ │   34500ft        ← altitude  (white)      │
+│   ╰───╯    420kt          ← ground speed (green)  │
+│            285HDG         ← heading      (orange) │
+├───────────────────────────────────────────────────┤
+│ D 12.3km                                       ↗  │  ← distance from home
+│ B 045°                                            │  ← bearing from home
+└───────────────────────────────────────────────────┘
+```
+
+The compass on the left always shows true-north up; the bearing arrow
+on the bottom-right points from your home toward the aircraft.
+
+---
+
+## 📁 Source layout
+
+```
+flight_apt_display/
+├── flight_apt_display.ino   - main sketch (setup/loop, scheduling)
+├── config.h                 - user-editable WiFi / location / pins
+├── api.{h,cpp}              - OpenSky Network REST client
+├── flight.{h,cpp}           - Flight data model + great-circle math
+├── display.{h,cpp}          - HUB75 rendering (splash / status / card)
+└── libraries.txt            - dependency list
+```
 
 ---
 
 ## 🛠️ Troubleshooting
 
-Attention to hardware design significantly impacts system reliability. A stable power supply, proper shielding, and good antenna placement are key to creating a robust, professional-grade monitoring solution.
-
 | Issue                  | Symptoms                       | Resolution                                             |
 | :--------------------- | :----------------------------- | :----------------------------------------------------- |
-| **WiFi Disconnections**| Periodic connectivity loss     | Disable modem sleep; implement reconnection logic.      |
-| **Random Resets** | Unexpected reboots             | Increase power supply capacity; add bulk capacitance.  |
-| **Display Corruption** | Garbled screen content         | Reduce I2C/SPI speed; improve ground connections.      |
-| **Memory Exhaustion** | Crashes after extended operation | Implement memory monitoring; reduce buffer sizes.      |
+| **WiFi Disconnections**| Periodic connectivity loss     | `WiFi.setSleep(false)` is enabled; verify router 2.4 GHz radio is reachable. |
+| **Random Resets**      | Unexpected reboots             | Increase PSU current (panel pulls 2–3 A peaks); add a 1000 µF bulk cap across the panel rail. |
+| **Display Corruption** | Garbled / shimmery image       | Try `cfg.clkphase = true` in `display.cpp`; shorten the HUB75 ribbon. |
+| **Memory Exhaustion**  | Crashes after a few hours      | Lower the `DynamicJsonDocument` size in `api.cpp` or shrink `SEARCH_RADIUS`. |
+| **HTTP -1 / -3**       | OpenSky returns 429            | Anonymous endpoint is rate-limited to 10 s; back off `POLL_INTERVAL_MS` or use credentials. |
 
 ---
 
 ## 🙏 Acknowledgements
 
-* This project was developed by **Sean Young ("1shyoung")**.
-* Inspiration and core concepts were adapted from the [flightportal](https://github.com/smartbutnot/flightportal) project. Thank you to the original creators for their excellent work.
+* Developed by **Sean Young (@1shyoung)** and **Martin Gong (@martingongg)**.
+* Inspiration adapted from the excellent [flightportal](https://github.com/smartbutnot/flightportal) project.
+* Live data courtesy of the [OpenSky Network](https://opensky-network.org/).
+* Display driver: [ESP32-HUB75-MatrixPanel-DMA](https://github.com/mrcodetastic/ESP32-HUB75-MatrixPanel-DMA).
 
 ---
 
 ## 📜 License
 
-This project is licensed under the MIT License. See the `LICENSE` file for details.
+MIT — see [`LICENSE`](./LICENSE) (or the badge at the top).

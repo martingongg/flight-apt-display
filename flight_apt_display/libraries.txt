@@ -1,0 +1,22 @@
+FlightAPT-Display - Required Arduino libraries
+================================================
+
+Install all of these from the Arduino IDE Library Manager
+(Sketch -> Include Library -> Manage Libraries...):
+
+  1. ESP32-HUB75-MatrixPanel-DMA   by mrcodetastic / mrfaptastic
+        - Drives the 64x64 HUB75 RGB LED matrix over I2S/DMA.
+        - Pulls in Adafruit GFX as a dependency.
+
+  2. ArduinoJson                   by Benoit Blanchon       (v6.x)
+        - Streaming JSON parser used to decode OpenSky responses.
+
+  3. Adafruit GFX Library          by Adafruit
+        - Drawing primitives + TomThumb font (auto-installed with #1).
+
+The following come bundled with the ESP32 board package, no Library
+Manager install needed:
+
+  * WiFi.h
+  * WiFiClientSecure.h
+  * HTTPClient.h
